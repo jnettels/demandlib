@@ -47,6 +47,8 @@ class HeatBuilding:
         wind classification for building location (0=not windy or 1=windy)
     ww_incl : boolean
         decider whether warm water load is included in the heat load profile
+    ww_only : boolean
+        if true, only warm water load is included in the heat load profile
     """
 
     def __init__(self, df_index, **kwargs):
@@ -71,6 +73,7 @@ class HeatBuilding:
                 "Building class must be 0 for non-residential buildings"
             )
         self.ww_incl = kwargs.get("ww_incl", True)
+        self.ww_only = kwargs.get("ww_only", False)
         self.name = kwargs.get("name", self.shlp_type)
 
     def weighted_temperature(self, how="geometric_series"):
@@ -297,6 +300,11 @@ class HeatBuilding:
             d = sigmoid["parameter_d"].iloc[0]
         else:
             d = 0
+
+        if self.ww_only:  # Get only the hot water profile
+            a = b = c = 0
+            d = sigmoid["parameter_d"].iloc[0]
+
         return a, b, c, d
 
     def get_weekday_parameters(self, filename="shlp_weekday_factors.csv"):
